@@ -1,181 +1,217 @@
 # HashiCorp Vault High Availability (HA) Cluster using Docker Compose & Raft
 
-![Vault](https://img.shields.io/badge/Vault-1.19-blue)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue)
-![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04-orange)
-![License](https://img.shields.io/badge/License-MIT-green)
-
----
-
 ## Overview
 
-This repository demonstrates how to deploy a **3-node HashiCorp Vault High Availability (HA)** cluster using **Docker Compose** and **Raft Integrated Storage**.
+This repository provides a complete implementation guide for deploying a **3-node HashiCorp Vault High Availability (HA)** cluster using **Docker Compose** and **Raft Integrated Storage**.
 
-It includes complete deployment documentation, configuration files, failover testing, Vault Agent concepts, Auto Unseal, troubleshooting, and production best practices.
+The purpose of this repository is to help engineers understand and implement:
 
-This project is intended for learning, testing, and educational purposes.
+- HashiCorp Vault High Availability (HA)
+- Raft Integrated Storage
+- Cluster Initialization
+- Manual Unseal Process
+- Leader Election
+- Automatic Failover
+- Data Replication
+- Vault Agent Concepts
+- Auto Unseal Concepts
+- Production Best Practices
+
+This project is intended for **learning, testing, and educational purposes** and serves as a practical reference for engineers deploying Vault in Docker-based environments.
 
 ---
 
-## Features
+# Features
 
 - 3 Node Vault HA Cluster
 - Docker Compose Deployment
 - Raft Integrated Storage
-- Automatic Leader Election
+- Leader Election
 - Automatic Failover
 - Data Replication
 - Vault Web UI
-- Complete Documentation
-- Vault Agent Guide
-- Auto Unseal Guide
-- Troubleshooting
+- Complete Step-by-Step Documentation
+- Troubleshooting Guide
 - Production Best Practices
+- Vault Agent Overview
+- Auto Unseal Overview
 
 ---
 
-## Architecture
-
-(Add architecture image here)
-
-Example
-
-![Architecture](screenshots/architecture.png)
-
----
-
-## Tested Environment
-
-| Component | Version |
-|------------|----------|
-| Ubuntu | 24.04 |
-| Vault | 1.19 |
-| Docker | Latest |
-| Docker Compose | v2 |
-
----
-
-## Repository Structure
-
-(Repository tree)
-
----
-
-## Quick Start
-
-Clone Repository
-
-```bash
-git clone https://github.com/<your-username>/vault-ha-cluster.git
-```
-
-Move into repository
-
-```bash
-cd vault-ha-cluster
-```
-
-Read
+# Architecture
 
 ```
-docs/01-Prerequisites.md
-```
+                           Client
+                              |
+                              |
+                        Vault UI / API
+                              |
+                 ---------------------------
+                              |
+                     Vault HA Cluster
+                 ---------------------------
 
-Follow documentation in sequence.
+          +---------------+---------------+---------------+
+          |               |               |               |
+          |    Vault1     |    Vault2     |    Vault3     |
+          |               |               |               |
+          |    Leader     |   Follower    |   Follower    |
+          +---------------+---------------+---------------+
+
+               <----- Raft Replication ----->
+```
 
 ---
 
-## Documentation
+# Environment
+
+| Component | Value |
+|------------|-------|
+| Vault Version | 1.19.x |
+| Deployment | Docker Compose |
+| Storage Backend | Raft Integrated Storage |
+| Operating System | Ubuntu |
+| Number of Nodes | 3 |
+
+---
+
+# Cluster Information
+
+| Node | Hostname | IP Address |
+|------|----------|------------|
+| Vault1 | master | 192.168.7.156 |
+| Vault2 | worker1 | 192.168.56.101 |
+| Vault3 | worker2 | 192.168.56.102 |
+
+> **Note:** These IP addresses are from a private lab environment and are provided as examples.
+
+---
+
+# Repository Structure
+
+```text
+vault-ha-cluster/
+│
+├── README.md
+├── docker-compose.yml
+├── LICENSE
+├── .gitignore
+│
+├── config/
+│   ├── vault1.hcl
+│   ├── vault2.hcl
+│   └── vault3.hcl
+│
+├── docs/
+│   ├── 01-Prerequisites.md
+│   ├── 02-Vault-Configuration.md
+│   ├── 03-Deployment.md
+│   ├── 04-Cluster-Initialization.md
+│   ├── 05-Unseal-and-Raft-Join.md
+│   ├── 06-Failover-Testing.md
+│   ├── 07-Raft-Explanation.md
+│   ├── 08-Troubleshooting.md
+│   ├── 09-Best-Practices.md
+│   ├── 10-Vault-Agent.md
+│   └── 11-Auto-Unseal.md
+│
+└── screenshots/
+```
+
+---
+
+# Configuration Files
+
+The repository contains ready-to-use configuration files for all Vault nodes.
+
+| File | Description |
+|------|-------------|
+| docker-compose.yml | Docker Compose deployment configuration |
+| config/vault1.hcl | Vault configuration for Node 1 |
+| config/vault2.hcl | Vault configuration for Node 2 |
+| config/vault3.hcl | Vault configuration for Node 3 |
+
+> **Note:** The same `docker-compose.yml` file is used on all three Vault nodes. The only difference between the nodes is the mounted `vault.hcl` configuration file.
+
+---
+
+# Documentation
+
+Detailed implementation guides are available in the **docs/** directory.
 
 | Document | Description |
 |----------|-------------|
-| 01 | Prerequisites |
-| 02 | Vault Configuration |
-| 03 | Deployment |
-| 04 | Cluster Initialization |
-| 05 | Unseal & Join |
-| 06 | Failover Testing |
-| 07 | Raft Explained |
-| 08 | Troubleshooting |
-| 09 | Best Practices |
-| 10 | Vault Agent |
-| 11 | Auto Unseal |
-| 12 | Backup & Restore |
-| 13 | Security Hardening |
+| 01-Prerequisites.md | System requirements and prerequisites |
+| 02-Vault-Configuration.md | Explanation of Vault configuration |
+| 03-Deployment.md | Docker deployment steps |
+| 04-Cluster-Initialization.md | Vault initialization process |
+| 05-Unseal-and-Raft-Join.md | Unseal Vault and join nodes |
+| 06-Failover-Testing.md | Leader election and failover validation |
+| 07-Raft-Explanation.md | Raft consensus explained |
+| 08-Troubleshooting.md | Common issues and resolutions |
+| 09-Best-Practices.md | Production recommendations |
+| 10-Vault-Agent.md | Vault Agent implementation |
+| 11-Auto-Unseal.md | Auto Unseal concepts |
 
 ---
 
-## Configuration
+# Tested Scenarios
 
-Configuration files are available inside
-
-```
-config/
-```
-
-Docker Compose
-
-```
-docker-compose.yml
-```
-
----
-
-## Screenshots
-
-Store screenshots under
-
-```
-screenshots/
-```
-
-Recommended screenshots:
-
-- Vault Login
-- Vault UI
-- Docker Containers
-- Raft Peers
-- Leader Election
-- Secret Replication
-- Failover
-
----
-
-## Tested Scenarios
+The following scenarios have been successfully validated.
 
 - Vault Initialization
 - Manual Unseal
-- Cluster Join
+- Raft Cluster Join
 - Leader Election
 - Automatic Failover
-- Secret Replication
+- Data Replication
 - Node Recovery
-- Cluster Synchronization
+- Secret Synchronization
 
 ---
 
-## Future Improvements
+# Failover Validation
 
-- AWS KMS Auto Unseal
-- Vault Agent Deployment
-- TLS
-- Kubernetes Deployment
-- AppRole Authentication
-- Prometheus Monitoring
-- Grafana Dashboard
-- Backup Automation
-- Disaster Recovery
+The following failover scenarios were successfully tested.
+
+- Leader container stopped.
+- Automatic leader election verified.
+- Secret creation after failover.
+- Original leader restarted.
+- Original leader rejoined as follower.
+- Automatic Raft synchronization verified.
 
 ---
 
-## Disclaimer
+# Screenshots
 
-This repository is intended for learning and educational purposes.
+Store screenshots in the **screenshots/** directory.
 
-Before deploying Vault in production, implement:
+Recommended screenshots:
+
+- Vault Login Page
+- Vault UI Dashboard
+- Raft Storage Overview
+- Cluster Members
+- Leader Election
+- Failover Testing
+- Secret Replication
+- Architecture Diagram
+
+---
+
+# Production Recommendations
+
+This implementation is intended for learning and testing.
+
+For production deployments, implement:
 
 - TLS
 - Auto Unseal
+- Vault Agent
+- Vault Agent Cache
+- Load Balancer (NGINX or HAProxy)
+- Audit Logging
 - Monitoring
 - Backup Strategy
 - Disaster Recovery
@@ -183,22 +219,44 @@ Before deploying Vault in production, implement:
 
 ---
 
-## References
+# Disclaimer
+
+This repository demonstrates the deployment of a **HashiCorp Vault High Availability (HA)** cluster using **Docker Compose** and **Raft Integrated Storage** for learning, testing, and educational purposes.
+
+The configurations and examples provided are intended for lab environments. Before deploying Vault in production, implement appropriate security measures such as:
+
+- TLS Encryption
+- Auto Unseal
+- Vault Agent
+- Authentication Policies
+- Monitoring
+- Backup & Restore Strategy
+- Disaster Recovery Planning
+
+---
+
+# References
+
+The following official resources provide additional information about HashiCorp Vault and related technologies.
 
 - HashiCorp Vault Documentation
+- Vault Raft Integrated Storage Documentation
+- Vault Agent Documentation
 - Docker Documentation
-- Raft Consensus Algorithm Documentation
+- Docker Compose Documentation
 
 ---
 
-## Contributing
+# Contributing
 
-Contributions, improvements, and suggestions are welcome.
+Contributions, suggestions, and improvements are welcome.
 
-Feel free to open an Issue or Pull Request.
+If you find any issues or have recommendations to improve this repository, feel free to open an Issue or submit a Pull Request.
 
 ---
 
-## License
+# License
 
-MIT License
+This project is licensed under the **MIT License**.
+
+See the `LICENSE` file for more information.
