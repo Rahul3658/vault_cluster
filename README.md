@@ -164,6 +164,17 @@ Vault2  → Follower
 Vault3  → Follower
 ```
 
+## Configuration Files
+
+The repository includes sample Vault configuration files for each node.
+
+| File | Description |
+|------|-------------|
+| `config/vault1.hcl` | Vault configuration for Node 1 |
+| `config/vault2.hcl` | Vault configuration for Node 2 |
+| `config/vault3.hcl` | Vault configuration for Node 3 |
+| `docker-compose.yml` | Docker Compose deployment file |
+```
 If Vault1 goes down
 
 ```
