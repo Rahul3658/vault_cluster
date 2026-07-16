@@ -1,19 +1,39 @@
-# HashiCorp Vault High Availability (HA) Cluster using Docker Compose and Raft
+# HashiCorp Vault High Availability (HA) Cluster using Docker Compose & Raft
 
 ## Overview
 
-This document explains how to deploy a **3-node HashiCorp Vault High Availability (HA)** cluster using **Docker Compose** and **Raft Integrated Storage**.
+This repository provides a complete implementation guide for deploying a **3-node HashiCorp Vault High Availability (HA)** cluster using **Docker Compose** and **Raft Integrated Storage**.
 
-The objective of this implementation is to achieve:
+The purpose of this repository is to help engineers understand:
 
-- High Availability (HA)
-- Automatic Leader Election
+- Vault High Availability (HA)
+- Raft Integrated Storage
+- Leader Election
+- Automatic Failover
 - Data Replication
-- Fault Tolerance
-- Zero Single Point of Failure
-- Integrated Storage using Raft
+- Cluster Initialization
+- Vault Agent
+- Auto Unseal
+- Production Best Practices
 
-This implementation is intended for **learning and testing purposes**. For production deployments, TLS, Auto Unseal, and a Load Balancer should be configured.
+This implementation was created for **learning, testing, and internal knowledge sharing**.
+
+---
+
+# Features
+
+- 3 Node Vault HA Cluster
+- Docker Compose Deployment
+- Raft Integrated Storage
+- Leader Election
+- Automatic Failover
+- Data Replication
+- Vault UI
+- Complete Step-by-Step Documentation
+- Troubleshooting Guide
+- Production Best Practices
+- Vault Agent Overview
+- Auto Unseal Overview
 
 ---
 
@@ -23,36 +43,38 @@ This implementation is intended for **learning and testing purposes**. For produ
                            Client
                               |
                               |
-                    Vault UI / API Request
+                        Vault UI / API
                               |
-        -------------------------------------------------
-        |                                               |
-                    Vault HA Cluster
-        -------------------------------------------------
+                 ---------------------------
+                              |
+                     Vault HA Cluster
+                 ---------------------------
 
-        +----------------+     +----------------+     +----------------+
-        |    Vault-1     |     |    Vault-2     |     |    Vault-3     |
-        |                |     |                |     |                |
-        |    Leader      |<--->|   Follower     |<--->|   Follower     |
-        |                |     |                |     |                |
-        +----------------+     +----------------+     +----------------+
+          +---------------+---------------+---------------+
+          |               |               |               |
+          |    Vault1     |    Vault2     |    Vault3     |
+          |               |               |               |
+          |    Leader     |   Follower    |   Follower    |
+          +---------------+---------------+---------------+
 
-                <--------- Raft Replication --------->
+               <----- Raft Replication ----->
 ```
 
 ---
 
 # Environment
 
-| Component | Details |
-|------------|---------|
+| Component | Value |
+|------------|-------|
 | Vault Version | 1.19.x |
 | Deployment | Docker Compose |
-| Storage Backend | Raft Integrated Storage |
+| Storage Backend | Raft |
 | Operating System | Ubuntu |
 | Number of Nodes | 3 |
 
-## Cluster Information
+---
+
+# Cluster Information
 
 | Node | Hostname | IP Address |
 |------|----------|------------|
@@ -62,50 +84,15 @@ This implementation is intended for **learning and testing purposes**. For produ
 
 ---
 
-# Features
-
-This implementation provides:
-
-- Vault Web UI
-- Raft Integrated Storage
-- High Availability
-- Leader Election
-- Data Replication
-- Automatic Failover
-- Docker Compose Deployment
-
----
-
-# Prerequisites
-
-Before starting, ensure the following requirements are met.
-
-- Ubuntu Server
-- Docker
-- Docker Compose Plugin
-- Root or sudo privileges
-- Network connectivity between all nodes
-- Ports 8200 and 8201 open between all Vault nodes
-
----
-
-# Network Ports
-
-| Port | Description |
-|-------|-------------|
-| 8200 | Vault API & Web UI |
-| 8201 | Raft Cluster Communication |
-
----
-
 # Repository Structure
 
 ```
 vault-ha-cluster/
 │
 ├── README.md
-│
 ├── docker-compose.yml
+├── LICENSE
+├── .gitignore
 │
 ├── config/
 │   ├── vault1.hcl
@@ -117,149 +104,146 @@ vault-ha-cluster/
 │   ├── 02-Vault-Configuration.md
 │   ├── 03-Deployment.md
 │   ├── 04-Cluster-Initialization.md
-│   ├── 05-Node-Join.md
+│   ├── 05-Unseal-and-Raft-Join.md
 │   ├── 06-Failover-Testing.md
 │   ├── 07-Raft-Explanation.md
 │   ├── 08-Troubleshooting.md
-│   └── 09-Best-Practices.md
+│   ├── 09-Best-Practices.md
+│   ├── 10-Vault-Agent.md
+│   └── 11-Auto-Unseal.md
 │
 └── screenshots/
 ```
 
 ---
 
-# High Availability Workflow
-
-```
-                 Client
-
-                    │
-
-                    ▼
-
-            Active Vault Node
-
-                    │
-
-          Replicate using Raft
-
-        ┌───────────┼────────────┐
-
-        ▼                        ▼
-
-   Standby Node             Standby Node
-```
-
-## Configuration Files
-
-The repository includes sample Vault configuration files for each node.
+# Configuration Files
 
 | File | Description |
 |------|-------------|
-| `config/vault1.hcl` | Vault configuration for Node 1 |
-| `config/vault2.hcl` | Vault configuration for Node 2 |
-| `config/vault3.hcl` | Vault configuration for Node 3 |
-| `docker-compose.yml` | Docker Compose deployment file |
+| docker-compose.yml | Docker Compose deployment file |
+| config/vault1.hcl | Vault configuration for Node 1 |
+| config/vault2.hcl | Vault configuration for Node 2 |
+| config/vault3.hcl | Vault configuration for Node 3 |
+
+> **Note:**  
+> The same `docker-compose.yml` file is used on all three Vault nodes. The only difference between the nodes is the mounted `vault.hcl` configuration file.
 
 ---
 
-# Failover Workflow
+# Documentation
 
-Initial State
+Detailed implementation guides are available under the **docs/** directory.
 
-```
-Vault1  → Leader
-
-Vault2  → Follower
-
-Vault3  → Follower
-```
-
-If Vault1 goes down
-
-```
-Vault1  → Down
-
-Vault2  → Leader
-
-Vault3  → Follower
-```
-
-When Vault1 comes back
-
-```
-Vault1  → Follower
-
-Vault2  → Leader
-
-Vault3  → Follower
-```
-
-The original leader **does not automatically become leader again**. Raft keeps the current leader to avoid unnecessary leader changes.
-
----
-
-# Verification
-
-The cluster was validated using the following tests.
-
-- Successfully initialized Vault.
-- Successfully unsealed Vault.
-- Joined multiple nodes using Raft.
-- Verified cluster members.
-- Tested automatic leader election.
-- Tested failover.
-- Verified data replication.
-- Restarted failed node and confirmed automatic synchronization.
+| Document | Description |
+|----------|-------------|
+| 01-Prerequisites.md | System requirements and environment preparation |
+| 02-Vault-Configuration.md | Explanation of every Vault configuration parameter |
+| 03-Deployment.md | Deploy Vault using Docker Compose |
+| 04-Cluster-Initialization.md | Initialize Vault and understand Unseal Keys |
+| 05-Unseal-and-Raft-Join.md | Unseal Vault and join additional nodes |
+| 06-Failover-Testing.md | Validate leader election and failover |
+| 07-Raft-Explanation.md | Understand the Raft consensus algorithm |
+| 08-Troubleshooting.md | Common deployment issues and fixes |
+| 09-Best-Practices.md | Production recommendations |
+| 10-Vault-Agent.md | Vault Agent architecture and caching |
+| 11-Auto-Unseal.md | Manual Unseal vs Auto Unseal |
 
 ---
 
 # Tested Scenarios
 
-✅ Vault Initialization
+The following scenarios have been successfully validated.
 
-✅ Manual Unseal
+- Vault Initialization
+- Manual Unseal
+- Raft Cluster Join
+- Leader Election
+- Automatic Failover
+- Data Replication
+- Node Recovery
+- Secret Synchronization
 
-✅ Raft Cluster Join
+---
 
-✅ Leader Election
+# Failover Validation
 
-✅ Automatic Failover
+The following failover scenarios were tested successfully.
 
-✅ Data Replication
+- Leader container stopped.
+- Automatic leader election.
+- Secret creation after failover.
+- Original leader restarted.
+- Original leader rejoined as follower.
+- Automatic Raft synchronization verified.
 
-✅ Node Recovery
+---
 
-✅ Secret Synchronization
+# Screenshots
+
+Store screenshots in the **screenshots/** directory.
+
+Suggested screenshots:
+
+- Vault Login Page
+- Vault UI Dashboard
+- Raft Storage Overview
+- Cluster Members
+- Leader Election
+- Failover Testing
+- Secret Replication
+- Architecture Diagram
 
 ---
 
 # Production Recommendations
 
-This implementation is intended for testing.
+This repository is intended for learning and testing.
 
-For Production:
+For production deployments, implement:
 
-- Enable TLS
-- Configure Auto Unseal
-- Deploy Vault Agent
-- Configure Load Balancer
-- Enable Monitoring
-- Schedule Raft Snapshots
-- Configure Backup Strategy
+- TLS
+- Auto Unseal
+- Vault Agent
+- Vault Agent Cache
+- Load Balancer (HAProxy or NGINX)
+- Audit Logging
+- Monitoring
+- Backup Strategy
+- Disaster Recovery
+- Least Privilege Policies
 
 ---
 
-# Next Documents
+# Future Enhancements
 
-Continue with the following documentation:
+The following topics can be added in future versions of this repository.
 
-1. 01-Prerequisites.md
-2. 02-Vault-Configuration.md
-3. 03-Deployment.md
-4. 04-Cluster-Initialization.md
-5. 05-Node-Join.md
-6. 06-Failover-Testing.md
-7. 07-Raft-Explanation.md
-8. 08-Troubleshooting.md
-9. 09-Best-Practices.md
+- Backup and Restore (Raft Snapshots)
+- Monitoring (Prometheus & Grafana)
+- Security Hardening
+- Kubernetes Deployment
+- AppRole Authentication
+- Disaster Recovery
+- Performance Replication
+- TLS Configuration
+
+---
+
+# References
+
+- HashiCorp Vault Documentation
+- Raft Integrated Storage Documentation
+- Docker Documentation
+
+---
+
+# Author
+
+Prepared for internal knowledge sharing and implementation reference.
+
+---
+
+# License
+
+This repository is intended for internal use and learning purposes.
