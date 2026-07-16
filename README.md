@@ -1,5 +1,13 @@
 # HashiCorp Vault High Availability (HA) Cluster using Docker Compose & Raft
 
+![Vault](https://img.shields.io/badge/Vault-1.19-blue)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04-E95420?logo=ubuntu&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Platform](https://img.shields.io/badge/Platform-Docker-blueviolet)
+![Storage](https://img.shields.io/badge/Storage-Raft-orange)
+![Status](https://img.shields.io/badge/Status-Completed-success)
+
 ## Overview
 
 This repository provides a complete implementation guide for deploying a **3-node HashiCorp Vault High Availability (HA)** cluster using **Docker Compose** and **Raft Integrated Storage**.
